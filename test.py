@@ -50,8 +50,10 @@ def scrape():
       count += 1
 
     # go to the next page
-    time.sleep(0.5)
-    browser.find_element_by_id('certificates_next').click()
+    try:
+      browser.find_element_by_id('certificates_next').click()
+    except:
+      continue
   
   browser.close()
 
