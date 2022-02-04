@@ -10,7 +10,22 @@ options = webdriver.ChromeOptions()
 options.add_argument('window-size=1200x600')
 browser = webdriver.Chrome(options=options)
 
-def scrape():
+def scrape_tokenSniffer():
+  # go to the target site
+  browser.get("https://www.rugscreen.com/Scan/Certificates")
+  print("Connecting to https://tokensniffer.com/tokens/scam...")
+
+  time.sleep(3)
+  # grab page source code
+  pageSource = browser.page_source
+  # using bs4 to parse the html source code
+  soup = BeautifulSoup(pageSource, 'lxml')
+  table = soup.find("table", {"class": "Home_section__16Giz"})
+  for i in table.tbody:
+    for j in i:
+      print(j.text)
+
+def scrape_rugScreen():
   # go to the target site
   browser.get("https://www.rugscreen.com/Scan/Certificates")
   print("Connecting to rugscreen.com...")
@@ -64,4 +79,5 @@ def writeToFile(data):
     writer.writerow(data)
 
 if __name__ == "__main__":
-  scrape()
+  # scrape_rugScreen()
+  scrape_tokenSniffer()
