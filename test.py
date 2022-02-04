@@ -9,21 +9,51 @@ import random
 options = webdriver.ChromeOptions()
 options.add_argument('window-size=1200x600')
 browser = webdriver.Chrome(options=options)
+# Name,Symbol,Network,Address,Deployed,Token Address,Contract Source,Detailed Info
 
 def scrape_tokenSniffer():
   # go to the target site
-  browser.get("https://www.rugscreen.com/Scan/Certificates")
+  browser.get("https://tokensniffer.com/tokens/scam")
   print("Connecting to https://tokensniffer.com/tokens/scam...")
 
   time.sleep(3)
-  # grab page source code
-  pageSource = browser.page_source
-  # using bs4 to parse the html source code
-  soup = BeautifulSoup(pageSource, 'lxml')
-  table = soup.find("table", {"class": "Home_section__16Giz"})
-  for i in table.tbody:
-    for j in i:
-      print(j.text)
+  
+  length = len(browser.find_elements_by_class_name("Home_name__3fbfx"))
+  count = 0
+  for i in range(length):
+    data = []
+
+    data.append(browser.find_elements_by_class_name("Home_name__3fbfx")[i].text)
+    browser.find_elements_by_class_name("Home_name__3fbfx")[i].click()
+    # now in the detailed page
+    if count % 10 == 0:
+      time.sleep(10)
+    # grab page source code
+    pageSource = browser.page_source
+    # using bs4 to parse the html source code
+    soup = BeautifulSoup(pageSource, 'html.parser')
+    head = soup.find("h2", {"class":"Home_title__3DjR7"})
+    data.append(head.find_all("div")[0].text[head.find_all("div")[0].text.find('(')+1:-1])
+    data.append(head.find_all("div")[1].text.strip().split(":")[0])
+    data.append(head.find_all("div")[1].text.strip().split(":")[1])
+
+    table = soup.find("table", {"class":"Home_section__16Giz"}).tbody
+    data.append(table.find_all("tr")[2].text.replace("Deployed","").strip()[:table.find_all("tr")[2].text.replace("Deployed","").strip().find('(')])
+
+    token_addr = "https://bscscan.com/token/" + head.find_all("div")[1].text.strip().split(":")[1]
+    data.append(token_addr)
+
+    contract_source = "https://tokensniffer.com/contract/" + head.find_all("div")[1].text.strip().split(":")[1]
+    data.append(contract_source)
+
+    data.append(browser.current_url)
+
+    print(count, ": ", data)
+    writeToFile("tokenSniffer.csv", data)
+    count += 1
+
+    time.sleep(1)
+    browser.execute_script("window.history.go(-1)")
 
 def scrape_rugScreen():
   # go to the target site
@@ -51,6 +81,7 @@ def scrape_rugScreen():
     pageSource = browser.page_source
     # using bs4 to parse the html source code
     soup = BeautifulSoup(pageSource, 'lxml')
+    print(soup)
     # links = []
     table = soup.find("table", {"id": "certificates"})
 
@@ -59,7 +90,7 @@ def scrape_rugScreen():
       for j in i:
         temp.append(j.text)
       print(temp)
-      writeToFile(temp)
+      writeToFile("certificates.csv", temp)
       temp = []
       print(count, '\n')
       count += 1
@@ -72,8 +103,8 @@ def scrape_rugScreen():
   
   browser.close()
 
-def writeToFile(data):
-  with open('certificates.csv', 'a', encoding='UTF8') as f:
+def writeToFile(filename, data):
+  with open(filename, 'a', encoding='UTF8') as f:
     writer = csv.writer(f)
     # write the data
     writer.writerow(data)
