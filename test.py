@@ -6,6 +6,9 @@ from fake_useragent import UserAgent
 import time
 import csv
 import random
+import pickle
+import pickle
+
 
 options = webdriver.ChromeOptions()
 ua = UserAgent()
@@ -13,14 +16,25 @@ ua = UserAgent()
 userAgent = ua.random
 print("User Agent: ", userAgent)
 options.add_argument(f'user-agent={userAgent}')
+options.add_argument("--user-data-dir=chrome-data")
+# Adding the argument --disable-blink-features=AutomationControlled
+options.add_argument('--disable-blink-features=AutomationControlled')
+# Exclude the collection of enable-automation switches
+options.add_experimental_option("excludeSwitches", ["enable-automation"])
+# Turn-off useAutomationExtension
+options.add_experimental_option('useAutomationExtension', False)
 # options.add_argument('window-size=1200x600')
 browser = webdriver.Chrome(options=options)
-# Name,Symbol,Network,Address,Deployed,Token Address,Contract Source,Detailed Info
+# Change the property value of the navigator for webdriver to undefined
+browser.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
 def scrape_tokenSniffer():
   # go to the target site
   browser.get("https://tokensniffer.com/tokens/scam")
   print("Connecting to https://tokensniffer.com/tokens/scam...")
+  cookies = pickle.load(open("cookies.pkl", "rb"))
+  for cookie in cookies:
+    browser.add_cookie(cookie)
 
   time.sleep(3)
   

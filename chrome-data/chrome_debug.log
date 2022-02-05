@@ -1,0 +1,7 @@
+[78096:36611:0204/225318.893733:ERROR:chrome_browser_main_extra_parts_metrics.cc(227)] START: ReportBluetoothAvailability(). If you don't see the END: message, this is crbug.com/1216328.
+[78096:36611:0204/225318.894480:ERROR:chrome_browser_main_extra_parts_metrics.cc(230)] END: ReportBluetoothAvailability()
+[78096:36611:0204/225318.894506:ERROR:chrome_browser_main_extra_parts_metrics.cc(235)] START: GetDefaultBrowser(). If you don't see the END: message, this is crbug.com/1216328.
+[78096:36611:0204/225318.896144:ERROR:chrome_browser_main_extra_parts_metrics.cc(239)] END: GetDefaultBrowser()
+[78096:259:0204/225346.710818:INFO:CONSOLE(1)] "fetchAd: SyntaxError: Unexpected end of JSON input", source: https://tokensniffer.com/_next/static/chunks/pages/tokens/scam-1b742e7ec0a99fdf0a1a.js (1)
+[78096:259:0204/225348.430319:INFO:CONSOLE(1)] "fetchAd: SyntaxError: Unexpected end of JSON input", source: https://tokensniffer.com/_next/static/chunks/pages/tokens/scam-1b742e7ec0a99fdf0a1a.js (1)
+[78096:259:0204/225348.865538:WARNING:pref_notifier_impl.cc(40)] Pref observer for media_router.cast_allow_all_ips found at shutdown.
