@@ -2,12 +2,18 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
+from fake_useragent import UserAgent
 import time
 import csv
 import random
 
 options = webdriver.ChromeOptions()
-options.add_argument('window-size=1200x600')
+ua = UserAgent()
+# a random User Agent
+userAgent = ua.random
+print("User Agent: ", userAgent)
+options.add_argument(f'user-agent={userAgent}')
+# options.add_argument('window-size=1200x600')
 browser = webdriver.Chrome(options=options)
 # Name,Symbol,Network,Address,Deployed,Token Address,Contract Source,Detailed Info
 
