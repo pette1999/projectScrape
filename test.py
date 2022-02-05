@@ -27,6 +27,12 @@ options.add_experimental_option('useAutomationExtension', False)
 browser = webdriver.Chrome(options=options)
 # Change the property value of the navigator for webdriver to undefined
 browser.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+# Name,Symbol,Network,Address,Deployed,Token Address,Contract Source,Detailed Info, token price, total supply, market cap, chart
+# header = ['Name', 'Symbol', 'Network', 'Address', 'Deployed', 'Token Address', 'Contract Source', 'Detailed Info', 'Token Price', 'Total Supply', 'Market Cap', 'Chart']
+# with open('tokenSniffer.csv', 'w', encoding='UTF8') as f:
+#   writer = csv.writer(f)
+#   # write the header
+#   writer.writerow(header)
 
 def scrape_tokenSniffer():
   # go to the target site
@@ -36,7 +42,7 @@ def scrape_tokenSniffer():
   for cookie in cookies:
     browser.add_cookie(cookie)
 
-  time.sleep(3)
+  time.sleep(1.5)
   
   length = len(browser.find_elements_by_class_name("Home_name__3fbfx"))
   count = 0
@@ -47,7 +53,7 @@ def scrape_tokenSniffer():
     browser.find_elements_by_class_name("Home_name__3fbfx")[i].click()
     # now in the detailed page
     if count % 10 == 0:
-      time.sleep(10)
+      time.sleep(1)
     # grab page source code
     pageSource = browser.page_source
     # using bs4 to parse the html source code
@@ -68,12 +74,41 @@ def scrape_tokenSniffer():
 
     data.append(browser.current_url)
 
+    # go to the pooCoin site and grab the information
+    pooCopin = "https://poocoin.app/tokens/" + head.find_all("div")[1].text.strip().split(":")[1]
+    browser.get(pooCopin)
+    time.sleep(3)
+    # price of the token
+    try:
+      price = browser.find_element_by_xpath('//*[@id="root"]/div/div[1]/div[2]/div/div[2]/div[1]/div[1]/div/div[1]/div/span').text
+    except:
+      price = ""
+      pass
+    data.append(price[1:])
+    # Total supply
+    try:
+      supply = browser.find_element_by_xpath('//*[@id="root"]/div/div[1]/div[2]/div/div[1]/div[2]').text
+    except:
+      supply = ""
+      pass
+    print(supply.split('\n'))
+    for n in range(len(supply.split('\n'))):
+      if "total supply" in supply.split('\n')[n].lower():
+        data.append(supply.split('\n')[n+1].strip())
+      if "market cap" in supply.split('\n')[n].lower():
+        if "$" in supply.split('\n')[n+1].strip():
+          data.append(supply.split('\n')[n+1].strip()[1:])
+        else:
+          for i in supply.split('\n')[n+2].strip().split(" "):
+            if "$" in i:
+              data.append(i[1:-1])
+
+    data.append(pooCopin)
+    
     print(count, ": ", data)
     writeToFile("tokenSniffer.csv", data)
     count += 1
-
-    time.sleep(1)
-    browser.execute_script("window.history.go(-1)")
+    browser.execute_script("window.history.go(-2)")
 
 def scrape_rugScreen():
   # go to the target site

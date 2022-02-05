@@ -1,2 +1,3 @@
-2022/02/04-22:32:41.595 10703 Creating DB /Users/peter/Documents/Projects/projectScrape/chrome-data/Default/Extension State since it was missing.
-2022/02/04-22:32:41.682 10703 Reusing MANIFEST /Users/peter/Documents/Projects/projectScrape/chrome-data/Default/Extension State/MANIFEST-000001
+2022/02/05-02:29:28.114 7503 Reusing MANIFEST /Users/peter/Documents/Projects/projectScrape/chrome-data/Default/Extension State/MANIFEST-000001
+2022/02/05-02:29:28.114 7503 Recovering log #3
+2022/02/05-02:29:28.114 7503 Reusing old log /Users/peter/Documents/Projects/projectScrape/chrome-data/Default/Extension State/000003.log 

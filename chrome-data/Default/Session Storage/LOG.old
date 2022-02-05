@@ -1,2 +1,6 @@
-2022/02/04-22:32:41.238 3103 Creating DB /Users/peter/Documents/Projects/projectScrape/chrome-data/Default/Session Storage since it was missing.
-2022/02/04-22:32:41.314 3103 Reusing MANIFEST /Users/peter/Documents/Projects/projectScrape/chrome-data/Default/Session Storage/MANIFEST-000001
+2022/02/05-02:29:27.666 4f03 Reusing MANIFEST /Users/peter/Documents/Projects/projectScrape/chrome-data/Default/Session Storage/MANIFEST-000001
+2022/02/05-02:29:27.666 4f03 Recovering log #7
+2022/02/05-02:29:27.667 4f03 Reusing old log /Users/peter/Documents/Projects/projectScrape/chrome-data/Default/Session Storage/000007.log 
+2022/02/05-02:33:18.354 4f03 Level-0 table #11: started
+2022/02/05-02:33:18.391 4f03 Level-0 table #11: 6717 bytes OK
+2022/02/05-02:33:18.430 4f03 Delete type=0 #7
