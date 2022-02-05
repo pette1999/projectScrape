@@ -94,3 +94,6 @@
 [26922:259:0205/024542.217100:INFO:CONSOLE(1)] "fetchAd: SyntaxError: Unexpected end of JSON input", source: https://tokensniffer.com/_next/static/chunks/pages/tokens/scam-1b742e7ec0a99fdf0a1a.js (1)
 [26922:259:0205/024546.221799:INFO:CONSOLE(1)] "fetchAd: SyntaxError: Unexpected end of JSON input", source: https://tokensniffer.com/_next/static/chunks/pages/tokens/scam-1b742e7ec0a99fdf0a1a.js (1)
 [26922:259:0205/024550.404920:INFO:CONSOLE(1)] "fetchAd: SyntaxError: Unexpected end of JSON input", source: https://tokensniffer.com/_next/static/chunks/pages/tokens/scam-1b742e7ec0a99fdf0a1a.js (1)
+[26922:147323:0205/030948.971115:WARNING:dns_config_service_posix.cc(205)] Failed to read DnsConfig.
+[26922:147323:0205/034035.999931:WARNING:dns_config_service_posix.cc(205)] Failed to read DnsConfig.
+[26922:259:0205/120637.922522:WARNING:pref_notifier_impl.cc(40)] Pref observer for media_router.cast_allow_all_ips found at shutdown.

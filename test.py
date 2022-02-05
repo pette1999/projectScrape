@@ -27,8 +27,6 @@ options.add_experimental_option('useAutomationExtension', False)
 browser = webdriver.Chrome(options=options)
 # Change the property value of the navigator for webdriver to undefined
 browser.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
-# Name,Symbol,Network,Address,Deployed,Token Address,Contract Source,Detailed Info, token price, total supply, market cap, chart
-# header = ['Name', 'Symbol', 'Network', 'Address', 'Deployed', 'Token Address', 'Contract Source', 'Detailed Info', 'Token Price', 'Total Supply', 'Market Cap', 'Chart']
 # with open('tokenSniffer.csv', 'w', encoding='UTF8') as f:
 #   writer = csv.writer(f)
 #   # write the header
