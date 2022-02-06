@@ -1,2 +1,2 @@
-pip3 install -r requirements.txt
+pip3 install -r requirement.txt
 python3 scrape.py
