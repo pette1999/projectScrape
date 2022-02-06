@@ -9,7 +9,6 @@ import time
 import csv
 import random
 import pickle
-import pickle
 
 
 options = webdriver.ChromeOptions()
