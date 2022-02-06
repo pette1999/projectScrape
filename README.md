@@ -1,7 +1,7 @@
 # projectScrape
 This project contains two scraping methods to scrpae Rugpull projects from rugscreen.com and tokensniffer.com
 
-### tokensniffer.com
+## tokensniffer.com
 The data scraped from the site is stored in the file `tokenSniffer.csv`. 
 The scraper would scrape the following information:
 - Project Name (ex. BABYDOS)
@@ -17,7 +17,7 @@ The scraper would scrape the following information:
 - Market Cap
 - Chart
 
-### Rugscreen.com
+## Rugscreen.com
 The data scraped from the site is stored in the file `certificates.csv`. **NOTE** (These projects are not identified as rugpull, these are clean projects)
 The scraper would scrape the following information:
 - Data Time(UTC)
