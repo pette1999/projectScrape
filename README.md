@@ -24,3 +24,10 @@ The scraper would scrape the following information:
 - Token URL
 - Contracts Scanned
 - Score
+
+## How to use it
+1. Clone this Project `git clone https://github.com/pette1999/projectScrape.git`
+2. Check your `Chrome` Browser version `Settings->About Chrome`
+3. Download the corresponding version of [chromedriver](https://chromedriver.chromium.org/downloads) and replace the one in the project directory
+4. in your terminal, run the `initialize.sh` file by typing `sh initialize.sh`
+5. You can run the project with `python3 scrape.py` after the fist initial set up
