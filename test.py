@@ -1,6 +1,8 @@
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
 import time
@@ -43,14 +45,14 @@ def scrape_tokenSniffer():
   time.sleep(1.5)
   
   length = len(browser.find_elements_by_class_name("Home_name__3fbfx"))
-  count = 0
+  print("length: ", length)
   for i in range(length):
     data = []
 
     data.append(browser.find_elements_by_class_name("Home_name__3fbfx")[i].text)
     browser.find_elements_by_class_name("Home_name__3fbfx")[i].click()
     # now in the detailed page
-    if count % 10 == 0:
+    if i % 10 == 0:
       time.sleep(1)
     # grab page source code
     pageSource = browser.page_source
@@ -74,39 +76,71 @@ def scrape_tokenSniffer():
 
     # go to the pooCoin site and grab the information
     pooCopin = "https://poocoin.app/tokens/" + head.find_all("div")[1].text.strip().split(":")[1]
-    browser.get(pooCopin)
-    time.sleep(3)
+    try:
+      browser.find_element_by_xpath('//*[@id="__next"]/div/main/div[2]/table/tbody/tr[2]/td/div/div[2]/a').click()
+    except:
+      data.append("")
+      data.append("")
+      data.append("")
+      data.append("")
+      print(i, ": ", data)
+      writeToFile("tokenSniffer.csv", data)
+      browser.execute_script("window.history.go(-1)")
+      continue
+    browser.switch_to.window(browser.window_handles[1])
+    # browser.get(pooCopin)
+    time.sleep(1.5)
+    print(browser.current_url)
+    
+
     # price of the token
     try:
-      price = browser.find_element_by_xpath('//*[@id="root"]/div/div[1]/div[2]/div/div[2]/div[1]/div[1]/div/div[1]/div/span').text
+      price = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//*[@id="root"]/div/div[1]/div[2]/div/div[2]/div[1]/div[1]/div/div[1]/div/span'))).text
+      # price = browser.find_element_by_xpath('//*[@id="root"]/div/div[1]/div[2]/div/div[2]/div[1]/div[1]/div/div[1]/div/span').text
     except:
       price = ""
       pass
+    print("Price: ", price)
     data.append(price[1:])
     # Total supply
     try:
-      supply = browser.find_element_by_xpath('//*[@id="root"]/div/div[1]/div[2]/div/div[1]/div[2]').text
+      # supply = browser.find_element_by_xpath('//*[@id="root"]/div/div[1]/div[2]/div/div[1]/div[2]').text
+      supply = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//*[@id="root"]/div/div[1]/div[2]/div/div[1]/div[2]'))).text
     except:
       supply = ""
       pass
-    print(supply.split('\n'))
+
+    print("Supply: ", supply.split('\n'))
+
+    supply_count = 0
+    marketCap_count = 0
     for n in range(len(supply.split('\n'))):
       if "total supply" in supply.split('\n')[n].lower():
-        data.append(supply.split('\n')[n+1].strip())
+        data.append(supply.split('\n')[n+1].strip().replace(",",""))
+        supply_count += 1
       if "market cap" in supply.split('\n')[n].lower():
         if "$" in supply.split('\n')[n+1].strip():
           data.append(supply.split('\n')[n+1].strip()[1:])
+          marketCap_count += 1
         else:
           for i in supply.split('\n')[n+2].strip().split(" "):
             if "$" in i:
-              data.append(i[1:-1])
+              data.append(i[1:-1].replace("$","").replace(",",""))
+              marketCap_count += 1
+    if supply_count == 0:
+      data.append("")
+    if marketCap_count == 0:
+      data.append("")
 
     data.append(pooCopin)
     
-    print(count, ": ", data)
+    print(i, ": ", data)
     writeToFile("tokenSniffer.csv", data)
-    count += 1
-    browser.execute_script("window.history.go(-2)")
+    browser.close()
+    browser.switch_to.window(browser.window_handles[0])
+    browser.execute_script("window.history.go(-1)")
+
+  browser.close()
 
 def scrape_rugScreen():
   # go to the target site
