@@ -25,15 +25,80 @@ options.add_argument('--disable-blink-features=AutomationControlled')
 options.add_experimental_option("excludeSwitches", ["enable-automation"])
 # Turn-off useAutomationExtension
 options.add_experimental_option('useAutomationExtension', False)
-service = Service("./chromedriver")
-# options.add_argument('window-size=1200x600')
-browser = webdriver.Chrome(options=options, service=service)
+# service = Service("./chromedriver2")
+
+browser = webdriver.Chrome(options=options)
 # Change the property value of the navigator for webdriver to undefined
 browser.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
-# with open('tokenSniffer.csv', 'w', encoding='UTF8') as f:
-#   writer = csv.writer(f)
-#   # write the header
-#   writer.writerow(header)
+
+
+def scrape_nftHolders_parsec(username,password,nft):
+  id = []
+  address = []
+  portfolio_value = []
+  nft_collection = []
+  collection_value = []
+  holding_balance = []
+  opensea = []
+  explore = []
+
+  browser.get("https://app.parsec.finance/login")
+  print("Connecting to parsec App...")
+  time.sleep(1)
+
+  field = browser.find_element(By.XPATH, '//*[@id="username"]')
+  field.send_keys(username)
+  browser.find_element(By.XPATH, '//*[@id="root"]/div/div/div/div[2]/span[1]').click()
+  field = browser.find_element(By.XPATH, '//*[@id="root"]/div/div/div/form/div[1]/input')
+  field.send_keys(password)
+  browser.find_element(By.XPATH, '//*[@id="root"]/div/div/div/form/div[2]/button').submit()
+
+  time.sleep(5)
+  browser.find_element(By.XPATH, '//*[@id="root"]/div/header/div[1]/div[1]').click()
+  browser.find_element(By.XPATH, '//*[@id="root"]/div/div[1]/div/div/button[2]').click()
+  browser.find_element(By.XPATH, '/html/body/div[2]/div[4]').click()
+  browser.find_element(By.XPATH, '/html/body/div[2]/div/div/div/button[1]').click()
+  browser.find_element(By.XPATH, '/html/body/div[2]/div/div/div[1]/div[2]').click()
+  field = browser.find_element(By.XPATH, '/html/body/div[2]/div/div/div[1]/div[2]/span[2]/div/input')
+  field.send_keys(nft)
+  browser.find_element(By.XPATH, '/html/body/div[2]/div/div/div[2]/button').click()
+  browser.find_element(By.XPATH, '//*[@id="nft-holders-table"]/div/div[1]/div[2]').click()
+  browser.find_element(By.XPATH, '//*[@id="nft-holders-table"]/div/div[2]/div/div[1]/button').click()
+  browser.find_element(By.XPATH, '//*[@id="nft-holders-table"]/div/div[2]/div/div[2]/div/div[2]/select/option[3]').click()
+  browser.find_element(By.XPATH, '//*[@id="nft-holders-table"]/div/div[2]/div/div[2]/button').click()
+  time.sleep(5)
+  for i in range(0,300):
+    print(i)
+    id_input = browser.find_elements(By.CLASS_NAME, 'AddressLabelPreview_text')[i].text
+    id.append(id_input)
+    browser.find_elements(By.CLASS_NAME, 'AddressLabelPreview_text')[i].click()
+    time.sleep(5)
+    portfolio_value_input = browser.find_elements(By.CLASS_NAME, 'ParsecSpan')[1].text.replace('$','')
+    portfolio_value.append(portfolio_value_input)
+    nft_collection.append(nft)
+    collection_value_input = browser.find_elements(By.CLASS_NAME, 'ParsecSpan')[4].text.replace('(','').replace(')','').replace('$','')
+    collection_value.append(collection_value_input)
+    opensea_input = browser.find_element(By.XPATH, '/html/body/div[2]/div[3]/a[1]').get_attribute('href')
+    opensea.append(opensea_input)
+    explore_input = browser.find_element(By.XPATH, '/html/body/div[2]/div[3]/a[2]').get_attribute('href')
+    explore.append(explore_input)
+    address_input = browser.find_element(By.XPATH, '/html/body/div[2]/div[3]/a[2]').get_attribute('href').replace('https://etherscan.io/address/','')
+    address.append(address_input)
+    j = i+1
+    balance = f'//*[@id="nft-holders-table"]/div/div[2]/div/div[2]/div[2]/div[{j}]/div/div[2]'
+    holding_balance_input = browser.find_element(By.XPATH, balance).text
+    holding_balance.append(holding_balance_input)
+    browser.find_element(By.XPATH, '/html/body/div[2]/button').click()
+
+    print(id_input,', ',address_input,', ',portfolio_value_input,', ',nft,', ',collection_value_input,', ',holding_balance_input,', ',opensea_input,', ',explore_input)
+  
+  print(id, address, portfolio_value, nft_collection, collection_value, holding_balance, opensea, explore)
+
+
+  # browser.find_element(By.XPATH, '//*[@id="nft-holders-table"]/div/div[2]/div/div[2]/div[2]/div[2]/div').click()
+  
+  # for i in range(1000):
+  #   print(f'//*[@id="nft-holders-table"]/div/div[2]/div/div[2]/div[2]/div[{i}]/div')
 
 def scrape_tokenSniffer():
   # go to the target site
@@ -199,4 +264,5 @@ def writeToFile(filename, data):
 
 if __name__ == "__main__":
   # scrape_rugScreen()
-  scrape_tokenSniffer()
+  # scrape_tokenSniffer()
+  scrape_nftHolders_parsec("haichen1999", "Meiguo1969", "Bored Ape Yacht Club")
