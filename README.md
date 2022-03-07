@@ -1,5 +1,5 @@
 # projectScrape
-This project contains three scraping methods to scrpae Rugpull projects from rugscreen.com, tokensniffer.com and Parsec.finance
+This project contains three scraping methods to scrpae Rugpull projects from [rugscreen.com](#Rugscreen.com), [tokensniffer.com](#tokensniffer.com) and [Parsec.finance](#Parsec.finance)
 
 ## Parsec.finance
 The data scraped from the site is stored in the file `nftHolders.csv`. 
