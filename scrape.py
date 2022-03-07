@@ -4,12 +4,15 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
 import time
 import csv
 import random
 import pickle
+from collections import defaultdict
+import pandas as pd
 
 
 options = webdriver.ChromeOptions()
@@ -31,6 +34,53 @@ browser = webdriver.Chrome(options=options)
 # Change the property value of the navigator for webdriver to undefined
 browser.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
+def count_names():
+  count = 0
+  filename = open('./data/nftHolders.csv', 'r')
+  file = csv.DictReader(filename)
+  link = []
+
+  for col in file:
+    link.append(col['twitter_username'])
+  
+  for i in link:
+    if i != '':
+      count += 1
+
+  print(count)
+
+def scrape_opensea_twitter():
+  count = 0
+  filename = open('./data/nftHolders.csv', 'r')
+  file = csv.DictReader(filename)
+  link = []
+  twitter_username = []
+  twitterUrl = []
+
+  for col in file:
+    link.append(col['opensea'])
+  
+  print(len(link))
+
+  for i in link:
+    count += 1
+
+    try:
+      browser.get(i)
+      time.sleep(1)
+      print(count, ' ', browser.find_element(By.CLASS_NAME, 'AccountHeader--social-username').text.replace('@',''))
+      twitter_username.append(browser.find_element(By.CLASS_NAME, 'AccountHeader--social-username').text.replace('@',''))
+      url = "https://twitter.com/" + browser.find_element(By.CLASS_NAME, 'AccountHeader--social-username').text.replace('@','')
+      twitterUrl.append(url)
+    except:
+      print(" ")
+      twitter_username.append('')
+      twitterUrl.append('')
+  
+  csv_input = pd.read_csv('./data/nftHolders.csv')
+  csv_input['twitter_username'] = twitter_username
+  csv_input['twitter_url'] = twitterUrl
+  csv_input.to_csv('./data/nftHolders.csv', index=False)
 
 def scrape_nftHolders_parsec(username,password,nft):
   id = []
@@ -60,7 +110,13 @@ def scrape_nftHolders_parsec(username,password,nft):
   browser.find_element(By.XPATH, '/html/body/div[2]/div/div/div/button[1]').click()
   browser.find_element(By.XPATH, '/html/body/div[2]/div/div/div[1]/div[2]').click()
   field = browser.find_element(By.XPATH, '/html/body/div[2]/div/div/div[1]/div[2]/span[2]/div/input')
+  field.send_keys(Keys.BACKSPACE)
+  time.sleep(0.5)
+  browser.find_element(By.XPATH, '/html/body/div[2]/div/div/div[1]/div[2]/span[2]/div/button').click()
   field.send_keys(nft)
+  time.sleep(0.5)
+  browser.find_element(By.XPATH, '/html/body/div[2]/div/div/div[1]/div[2]/span[2]/div/div/div/button[1]').click()
+
   browser.find_element(By.XPATH, '/html/body/div[2]/div/div/div[2]/button').click()
   browser.find_element(By.XPATH, '//*[@id="nft-holders-table"]/div/div[1]/div[2]').click()
   browser.find_element(By.XPATH, '//*[@id="nft-holders-table"]/div/div[2]/div/div[1]/button').click()
@@ -73,29 +129,32 @@ def scrape_nftHolders_parsec(username,password,nft):
     id.append(id_input)
     browser.find_elements(By.CLASS_NAME, 'AddressLabelPreview_text')[i].click()
     time.sleep(5)
-    portfolio_value_input = browser.find_elements(By.CLASS_NAME, 'ParsecSpan')[1].text.replace('$','')
-    portfolio_value.append(portfolio_value_input)
-    nft_collection.append(nft)
-    collection_value_input = browser.find_elements(By.CLASS_NAME, 'ParsecSpan')[4].text.replace('(','').replace(')','').replace('$','')
-    collection_value.append(collection_value_input)
-    opensea_input = browser.find_element(By.XPATH, '/html/body/div[2]/div[3]/a[1]').get_attribute('href')
-    opensea.append(opensea_input)
-    explore_input = browser.find_element(By.XPATH, '/html/body/div[2]/div[3]/a[2]').get_attribute('href')
-    explore.append(explore_input)
-    address_input = browser.find_element(By.XPATH, '/html/body/div[2]/div[3]/a[2]').get_attribute('href').replace('https://etherscan.io/address/','')
-    address.append(address_input)
-    j = i+1
-    balance = f'//*[@id="nft-holders-table"]/div/div[2]/div/div[2]/div[2]/div[{j}]/div/div[2]'
-    holding_balance_input = browser.find_element(By.XPATH, balance).text
-    holding_balance.append(holding_balance_input)
-    browser.find_element(By.XPATH, '/html/body/div[2]/button').click()
+    try:
+      portfolio_value_input = browser.find_elements(By.CLASS_NAME, 'ParsecSpan')[1].text.replace('$','')
+      portfolio_value.append(portfolio_value_input)
+      nft_collection.append(nft)
+      collection_value_input = browser.find_elements(By.CLASS_NAME, 'ParsecSpan')[4].text.replace('(','').replace(')','').replace('$','')
+      collection_value.append(collection_value_input)
+      opensea_input = browser.find_element(By.XPATH, '/html/body/div[2]/div[3]/a[1]').get_attribute('href')
+      opensea.append(opensea_input)
+      explore_input = browser.find_element(By.XPATH, '/html/body/div[2]/div[3]/a[2]').get_attribute('href')
+      explore.append(explore_input)
+      address_input = browser.find_element(By.XPATH, '/html/body/div[2]/div[3]/a[2]').get_attribute('href').replace('https://etherscan.io/address/','')
+      address.append(address_input)
+      j = i+1
+      balance = f'//*[@id="nft-holders-table"]/div/div[2]/div/div[2]/div[2]/div[{j}]/div/div[2]'
+      holding_balance_input = browser.find_element(By.XPATH, balance).text
+      holding_balance.append(holding_balance_input)
+      browser.find_element(By.XPATH, '/html/body/div[2]/button').click()
 
-    data = [id_input,address_input,portfolio_value_input,nft,collection_value_input,holding_balance_input,opensea_input,explore_input]
-    print(data)
-    writeToFile('./data/nftHolders.csv', data)
+      data = [id_input,address_input,portfolio_value_input,nft,collection_value_input,holding_balance_input,opensea_input,explore_input]
+      print(data)
+      writeToFile('./data/nftHolders.csv', data)
+    except:
+      writeToFile('./data/nftHolders.csv', ['','','','','','',''])
   
   print(id, address, portfolio_value, nft_collection, collection_value, holding_balance, opensea, explore)
-
+  browser.close()
 
   # browser.find_element(By.XPATH, '//*[@id="nft-holders-table"]/div/div[2]/div/div[2]/div[2]/div[2]/div').click()
   
@@ -272,5 +331,9 @@ def createFile(filename, header):
 if __name__ == "__main__":
   # scrape_rugScreen()
   # scrape_tokenSniffer()
-  scrape_nftHolders_parsec("haichen1999", "Meiguo1969", "Bored Ape Yacht Club")
+  # scrape_nftHolders_parsec("haichen1999", "Meiguo1969", "Bored Ape Yacht Club")
+  # scrape_nftHolders_parsec("haichen1999", "Meiguo1969", "CryptoPunks")
+  # scrape_nftHolders_parsec("haichen1999", "Meiguo1969", "Doodles V4")
+  # scrape_opensea_twitter()
+  count_names()
   # createFile('./data/nftHolders.csv', ['id', 'wallet_address', 'portfolio_value', 'nft_collection', 'collection_value', 'holding_balance', 'opensea', 'explore'])
