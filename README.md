@@ -1,5 +1,19 @@
 # projectScrape
-This project contains two scraping methods to scrpae Rugpull projects from rugscreen.com and tokensniffer.com
+This project contains three scraping methods to scrpae Rugpull projects from rugscreen.com, tokensniffer.com and Parsec.finance
+
+## Parsec.finance
+The data scraped from the site is stored in the file `nftHolders.csv`. 
+The scraper would scrape the following information:
+- Parsec ID
+- NFT holder wallet address
+- Portfolio Value
+- NFT collection
+- Collection Value
+- Holding Balance
+- Opensea url
+- Explore url
+- Twitter username (if found on opensea)
+- Twitter profile url (if found on opensea)
 
 ## tokensniffer.com
 The data scraped from the site is stored in the file `tokenSniffer.csv`. 
