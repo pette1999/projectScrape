@@ -90,7 +90,9 @@ def scrape_nftHolders_parsec(username,password,nft):
     holding_balance.append(holding_balance_input)
     browser.find_element(By.XPATH, '/html/body/div[2]/button').click()
 
-    print(id_input,', ',address_input,', ',portfolio_value_input,', ',nft,', ',collection_value_input,', ',holding_balance_input,', ',opensea_input,', ',explore_input)
+    data = [id_input,address_input,portfolio_value_input,nft,collection_value_input,holding_balance_input,opensea_input,explore_input]
+    print(data)
+    writeToFile('./data/nftHolders.csv', data)
   
   print(id, address, portfolio_value, nft_collection, collection_value, holding_balance, opensea, explore)
 
@@ -262,7 +264,13 @@ def writeToFile(filename, data):
     # write the data
     writer.writerow(data)
 
+def createFile(filename, header):
+  with open(filename, 'w', encoding='UTF8', newline='') as f:
+    writer = csv.writer(f)
+    writer.writerow(header)
+
 if __name__ == "__main__":
   # scrape_rugScreen()
   # scrape_tokenSniffer()
   scrape_nftHolders_parsec("haichen1999", "Meiguo1969", "Bored Ape Yacht Club")
+  # createFile('./data/nftHolders.csv', ['id', 'wallet_address', 'portfolio_value', 'nft_collection', 'collection_value', 'holding_balance', 'opensea', 'explore'])
