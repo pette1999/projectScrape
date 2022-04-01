@@ -13,6 +13,7 @@ import random
 import pickle
 from collections import defaultdict
 import pandas as pd
+from tqdm import tqdm
 
 
 options = webdriver.ChromeOptions()
@@ -317,6 +318,13 @@ def scrape_rugScreen():
   
   browser.close()
 
+def run_through_websites():
+  websites = readCol('./data.csv', 'link')
+  for i in tqdm(range(len(websites))):
+    browser.get(websites[i])
+    for i in tqdm(range(35)):
+      time.sleep(1)
+
 def writeToFile(filename, data):
   with open(filename, 'a', encoding='UTF8') as f:
     writer = csv.writer(f)
@@ -328,6 +336,14 @@ def createFile(filename, header):
     writer = csv.writer(f)
     writer.writerow(header)
 
+def readCol(filename, colName):
+  id = []
+  file = csv.DictReader(open(filename, 'r'))
+  for col in file:
+    id.append(col[colName])
+
+  return id
+
 if __name__ == "__main__":
   # scrape_rugScreen()
   # scrape_tokenSniffer()
@@ -335,5 +351,6 @@ if __name__ == "__main__":
   # scrape_nftHolders_parsec("haichen1999", "Meiguo1969", "CryptoPunks")
   # scrape_nftHolders_parsec("haichen1999", "Meiguo1969", "Doodles V4")
   # scrape_opensea_twitter()
-  count_names()
+  # count_names()
   # createFile('./data/nftHolders.csv', ['id', 'wallet_address', 'portfolio_value', 'nft_collection', 'collection_value', 'holding_balance', 'opensea', 'explore'])
+  run_through_websites()
