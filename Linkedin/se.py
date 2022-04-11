@@ -12,6 +12,8 @@ import getpass
 import json
 import pickle
 from os.path import exists
+from tqdm import tqdm
+import csv
 
 options = webdriver.ChromeOptions()
 ua = UserAgent()
@@ -27,6 +29,12 @@ options.add_argument("--incognito")
 browser = webdriver.Chrome(options=options)
 browser.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
+def writeToFile(filename, data):
+  with open(filename, 'a', encoding='UTF8') as f:
+    writer = csv.writer(f)
+    # write the data
+    writer.writerow(data)
+    
 def prompt_email_password():
   u = input("Email: ")
   p = getpass.getpass(prompt="Password: ")
@@ -96,14 +104,32 @@ def getPageNumber(driver):
   
   max_page = bs_content.find_all("li", class_="artdeco-pagination__indicator artdeco-pagination__indicator--number ember-view")[-1].span.string
   print(max_page)
-  return max_page
+  return [max_page,bs_content]
   
-def getPeopleUrl():
-  pass
+def getPeopleUrl(driver,count,search_term):
+  link = []
+  for c in tqdm(range(int(count))):
+    if c%10 == 0:
+      time.sleep(5)
+    url = "https://www.linkedin.com/search/results/people/?keywords=student%20at%20harvard%20university&origin=SWITCH_SEARCH_VERTICAL&page=" + str(c) + "&sid=jdX"
+    driver.get(url)
+    driver.execute_script("window.scrollTo(0, Math.ceil(document.body.scrollHeight/2));")
+    time.sleep(1)
+    driver.execute_script("window.scrollTo(0, Math.ceil(document.body.scrollHeight*3/4));")
+    time.sleep(1)
+    bs_content = bs(driver.page_source, "html.parser")
+    # f = open("page.html","w")
+    # f.write(str(bs_content))
+    # f.close()
+    for i in bs_content.find_all("a", class_="app-aware-link"):
+      if i.get('href') not in link and '-' in i.get('href')[27:] and i.get('target') != "_self":
+        link.append(i.get('href'))
+        writeToFile('./data/link.csv',i.get('href'))
+  print(len(link))
   
 def main():
   login(browser,email="chenhaifan19991113@gmail.com",password="Meiguo1969")
-  getPageNumber(browser)
+  getPeopleUrl(browser,getPageNumber(browser)[0],0)
 
 
 # browser.get("https://www.linkedin.com/search/results/people/?keywords=student%20at%20harvard%20university&origin=SWITCH_SEARCH_VERTICAL&page=1&sid=L-I")
