@@ -11,6 +11,7 @@ import time
 import getpass
 import json
 import pickle
+from os.path import exists
 
 options = webdriver.ChromeOptions()
 ua = UserAgent()
@@ -35,8 +36,31 @@ def page_has_loaded(driver):
   page_state = driver.execute_script('return document.readyState;')
   return page_state == 'complete'
 
-def login(driver, email=None, password=None, cookie=None, timeout=10):
-  if cookie is not None:
+def loadcookie(driver):
+  driver.get("https://www.linkedin.com/login")
+  print("loading cookie")
+  cookies = pickle.load(open("cookies.pkl", "rb"))
+  print(cookies)
+  driver.add_cookie(cookies)
+  print('loaded cookie')
+
+def savecookies(driver):
+  time.sleep(5)
+  cookies=driver.get_cookies()
+  for cookie in cookies:
+      if(cookie['name']=='li_at'):
+          cookie['domain']='.linkedin.com'
+          x={
+          'name': 'li_at',
+          'value': cookie['value'],
+          'domain': '.linkedin.com'
+          }
+          break
+  pickle.dump(x , open("cookies.pkl","wb"))
+  print('cookies saved')
+
+def login(driver, email=None, password=None, timeout=10):
+  if exists('./cookies.pkl'):
     loadcookie(driver)
     driver.get("https://www.linkedin.com")
     return
@@ -58,38 +82,34 @@ def login(driver, email=None, password=None, cookie=None, timeout=10):
   except: pass
   
   savecookies(browser)
+
+def getPageNumber(driver):
+  driver.get("https://www.linkedin.com/search/results/people/?keywords=student%20at%20harvard%20university&network=%5B%22S%22%5D&origin=FACETED_SEARCH&page=25&sid=5!C")
+  driver.execute_script("window.scrollTo(0, Math.ceil(document.body.scrollHeight/2));")
+  time.sleep(1)
+  driver.execute_script("window.scrollTo(0, Math.ceil(document.body.scrollHeight*3/4));")
+  time.sleep(1)
+  bs_content = bs(driver.page_source, "html.parser")
+  # f = open("page.html","w")
+  # f.write(str(bs_content))
+  # f.close()
   
-def loadcookie(driver):
-  driver.get("https://www.linkedin.com/login")
-  print("loading cookie")
-  cookies = pickle.load(open("cookies.pkl", "rb"))
-  print(cookies)
-  driver.add_cookie(cookies)
-  print('loaded cookie')
+  max_page = bs_content.find_all("li", class_="artdeco-pagination__indicator artdeco-pagination__indicator--number ember-view")[-1].span.string
+  print(max_page)
+  return max_page
   
-def savecookies(driver):
-  time.sleep(5)
-  cookies=driver.get_cookies()
-  for cookie in cookies:
-      if(cookie['name']=='li_at'):
-          cookie['domain']='.linkedin.com'
-          x={
-          'name': 'li_at',
-          'value': cookie['value'],
-          'domain': '.linkedin.com'
-          }
-          break
-  pickle.dump(x , open("cookies.pkl","wb"))
-  print('cookies saved')
+def getPeopleUrl():
+  pass
   
-login(browser,email="chenhaifan19991113@gmail.com",password="Meiguo1969",cookie='0')
-# # python_button.send_keys(Keys.RETURN)
-# print("Logging in...")
-# time.sleep(3)
+def main():
+  login(browser,email="chenhaifan19991113@gmail.com",password="Meiguo1969")
+  getPageNumber(browser)
+
+
 # browser.get("https://www.linkedin.com/search/results/people/?keywords=student%20at%20harvard%20university&origin=SWITCH_SEARCH_VERTICAL&page=1&sid=L-I")
-# time.sleep(10)
 # bs_content = bs(browser.page_source, "lxml")
 # f = open("page.html","w")
 # f.write(str(bs_content))
 # f.close()
-# browser.close()
+
+main()

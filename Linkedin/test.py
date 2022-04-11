@@ -30,7 +30,7 @@ with sync_playwright() as p:
     }
   })('""" + session_storage + "')")
   page.wait_for_load_state()
-  page.goto("https://www.linkedin.com/search/results/people/?keywords=student%20at%20harvard%20university&origin=SWITCH_SEARCH_VERTICAL&page=1&sid=L-I")
+  page.goto("https://www.linkedin.com/search/results/people/?keywords=student%20at%20harvard%20university&network=%5B%22S%22%5D&origin=FACETED_SEARCH&page=25&sid=5!C")
   page.wait_for_load_state()
   print(page.content())
   bs_content = bs(page.content(), "html.parser")
