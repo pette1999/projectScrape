@@ -124,12 +124,60 @@ def getPeopleUrl(driver,count,search_term):
     for i in bs_content.find_all("a", class_="app-aware-link"):
       if i.get('href') not in link and '-' in i.get('href')[27:] and i.get('target') != "_self":
         link.append(i.get('href'))
-        writeToFile('./data/link.csv',i.get('href'))
+        writeToFile('./data/link.csv',[i.get('href')])
   print(len(link))
+  
+def getPeople(driver):
+  driver.get("https://www.linkedin.com/in/ben-neal-5220b8161/")
+  root = WebDriverWait(driver, 5).until(
+    EC.presence_of_element_located(
+      (
+        By.CLASS_NAME,
+        "pv-top-card",
+      )
+    )
+  )
+  driver.execute_script("window.scrollTo(0, Math.ceil(document.body.scrollHeight/2));")
+  time.sleep(1)
+  driver.execute_script("window.scrollTo(0, Math.ceil(document.body.scrollHeight*3/4));")
+  time.sleep(1)
+  bs_content = bs(driver.page_source, "html.parser")
+  # f = open("page2.html","w")
+  # f.write(str(bs_content))
+  # f.close()
+  
+  # get name
+  name = root.find_element(By.CLASS_NAME, 'text-heading-xlarge').text.strip()
+  print(name)
+  # get about
+  about = ""
+  try:
+    see_more = WebDriverWait(driver, 5).until(
+      EC.presence_of_element_located(
+        (
+          By.XPATH,
+          "//*[@class='lt-line-clamp__more']",
+        )
+      )
+    )
+    driver.execute_script("arguments[0].click();", see_more)
+    about = WebDriverWait(driver, 5).until(
+      EC.presence_of_element_located(
+        (
+          By.XPATH,
+          "//*[@class='lt-line-clamp__raw-line']",
+        )
+      )
+    )
+  except:
+    print("can't")
+  if about:
+    print(about)
   
 def main():
   login(browser,email="chenhaifan19991113@gmail.com",password="Meiguo1969")
-  getPeopleUrl(browser,getPageNumber(browser)[0],0)
+  # getPeopleUrl(browser,getPageNumber(browser)[0],0)
+  getPeople(browser)
 
 
 # browser.get("https://www.linkedin.com/search/results/people/?keywords=student%20at%20harvard%20university&origin=SWITCH_SEARCH_VERTICAL&page=1&sid=L-I")
