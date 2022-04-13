@@ -48,7 +48,7 @@ def loadcookie(driver):
   driver.get("https://www.linkedin.com/login")
   print("loading cookie")
   cookies = pickle.load(open("cookies.pkl", "rb"))
-  print(cookies)
+  # print(cookies)
   driver.add_cookie(cookies)
   print('loaded cookie')
 
@@ -127,8 +127,8 @@ def getPeopleUrl(driver,count,search_term):
         writeToFile('./data/link.csv',[i.get('href')])
   print(len(link))
   
-def getPeople(driver):
-  driver.get("https://www.linkedin.com/in/ben-neal-5220b8161/")
+def getPeople(driver, url):
+  driver.get(url)
   root = WebDriverWait(driver, 5).until(
     EC.presence_of_element_located(
       (
@@ -142,42 +142,155 @@ def getPeople(driver):
   driver.execute_script("window.scrollTo(0, Math.ceil(document.body.scrollHeight*3/4));")
   time.sleep(1)
   bs_content = bs(driver.page_source, "html.parser")
-  # f = open("page2.html","w")
-  # f.write(str(bs_content))
-  # f.close()
+  f = open("page2.html","w")
+  f.write(str(bs_content))
+  f.close()
   
   # get name
   name = root.find_element(By.CLASS_NAME, 'text-heading-xlarge').text.strip()
-  print(name)
+  print("name: ", name)
   # get about
-  about = ""
-  try:
-    see_more = WebDriverWait(driver, 5).until(
-      EC.presence_of_element_located(
-        (
-          By.XPATH,
-          "//*[@class='lt-line-clamp__more']",
-        )
-      )
-    )
-    driver.execute_script("arguments[0].click();", see_more)
-    about = WebDriverWait(driver, 5).until(
-      EC.presence_of_element_located(
-        (
-          By.XPATH,
-          "//*[@class='lt-line-clamp__raw-line']",
-        )
-      )
-    )
-  except:
-    print("can't")
-  if about:
-    print(about)
+  # check if the person has the about section
+  if len(driver.find_elements(By.ID, 'about')) > 0:
+    # has the section
+    about = bs_content.find("div", class_="display-flex ph5 pv3").div.div.div.span.text
+  else:
+    about = None
+  print("about: ", about)
+  # get experience
+  section = bs_content.find_all("section", class_="artdeco-card ember-view break-words pb3 mt4")
+  # check if the person has the experience section
+  experience = []
+  if len(driver.find_elements(By.ID, 'experience')) > 0:
+    for i in range(len(section)):
+      if section[i].div.get('id') == "experience":
+        for j in bs_content.find_all("section", class_="artdeco-card ember-view break-words pb3 mt4")[i].select("div:nth-of-type("+str(3)+")"):
+          # each j is an experience
+          # check if has the show all button
+          try:       
+            if "Show all" in j.find("span", class_="pvs-navigation__text").text.strip():
+              # has the show all button
+              driver.get(url + "details/experience/")
+              time.sleep(3)
+              detail_content = bs(driver.page_source, "html.parser")
+              # scrape all experiences
+              for x in detail_content.find_all("ul", class_="pvs-list"):
+                for y in x.find_all("span", class_="visually-hidden"):
+                  if y.text.strip() not in experience:
+                    experience.append(y.text.strip())
+              driver.back()
+            else:
+              for k in j.find_all("span", class_="visually-hidden"):
+                if k.text.strip() not in experience:
+                  experience.append(k.text.strip())
+          except:
+            for k in j.find_all("span", class_="visually-hidden"):
+              if k.text.strip() not in experience:
+                experience.append(k.text.strip())
+  else:
+    experience = None
+  print("experience: ", experience)
+  # get education
+  # check if person has the education section
+  education = []
+  if len(driver.find_elements(By.ID, 'education')) > 0:
+    for i in range(len(section)):
+      if section[i].div.get('id') == "education":
+        for j in bs_content.find_all("section", class_="artdeco-card ember-view break-words pb3 mt4")[i].select("div:nth-of-type("+str(3)+")"):
+          for k in j.find_all('span', class_="visually-hidden"):
+            if k.text.strip() not in education:
+              education.append(k.text.strip())
+  else:
+    education = None
+  print("education: ", education)
+  # get volunteering
+  volunteering = []
+  if len(driver.find_elements(By.ID, 'volunteering_experience')) > 0:
+    for i in range(len(section)):
+      if section[i].div.get('id') == "volunteering_experience":
+        for j in bs_content.find_all("section", class_="artdeco-card ember-view break-words pb3 mt4")[i].select("div:nth-of-type("+str(3)+")"):
+          # check if has the show all button
+          try:  
+            if "Show all" in j.find("span", class_="pvs-navigation__text").text.strip():
+              driver.get(url + "details/volunteering-experiences/")
+              time.sleep(3)
+              detail_content = bs(driver.page_source, "html.parser")
+              # scrape all volunteering experiences
+              for x in detail_content.find_all("ul", class_="pvs-list"):
+                for y in x.find_all("span", class_="visually-hidden"):
+                  if y.text.strip() not in volunteering:
+                    volunteering.append(y.text.strip())
+              driver.back()
+            else:
+              for k in j.find_all('span', class_="visually-hidden"):
+                if k.text.strip() not in volunteering:
+                  volunteering.append(k.text.strip())
+          except:
+            for k in j.find_all('span', class_="visually-hidden"):
+              if k.text.strip() not in volunteering:
+                volunteering.append(k.text.strip())
+  else:
+    volunteering = None
+  print("volunteering: ", volunteering)
+  # get licenses and certificates
+  licenses = []
+  if len(driver.find_elements(By.ID, 'licenses_and_certifications')) > 0:
+    for i in range(len(section)):
+      if section[i].div.get('id') == "licenses_and_certifications":
+        for j in bs_content.find_all("section", class_="artdeco-card ember-view break-words pb3 mt4")[i].select("div:nth-of-type("+str(3)+")"):
+          for k in j.find_all('span', class_="visually-hidden"):
+            if k.text.strip() not in licenses:
+              licenses.append(k.text.strip())
+  else:
+    licenses = None
+  print("Licenses: ", licenses)
+  # get Honors & awards
+  honors = []
+  if len(driver.find_elements(By.ID, 'honors_and_awards')) > 0:
+    for i in range(len(section)):
+      if section[i].div.get('id') == "honors_and_awards":
+        for j in bs_content.find_all("section", class_="artdeco-card ember-view break-words pb3 mt4")[i].select("div:nth-of-type("+str(3)+")"):
+          for k in j.find_all('span', class_="visually-hidden"):
+            if k.text.strip() not in honors:
+              honors.append(k.text.strip())
+  else:
+    honors = None
+  print("Hornors: ", honors)
+  # get skills
+  skills = []
+  if len(driver.find_elements(By.ID, 'skills')) > 0:
+    for i in range(len(section)):
+      if section[i].div.get('id') == "skills":
+        for j in bs_content.find_all("section", class_="artdeco-card ember-view break-words pb3 mt4")[i].select("div:nth-of-type("+str(3)+")"):
+          # check if has the show all button
+          try:  
+            if "Show all" in j.find("span", class_="pvs-navigation__text").text.strip():
+              driver.get(url + "details/skills/")
+              time.sleep(3)
+              detail_content = bs(driver.page_source, "html.parser")
+              # scrape all skills experiences
+              for x in detail_content.find_all("ul", class_="pvs-list"):
+                for y in x.find_all("span", class_="visually-hidden"):
+                  if y.text.strip() not in skills and '·' not in y.text.strip():
+                    skills.append(y.text.strip())
+              driver.back()
+            else:
+              for k in j.find_all('span', class_="visually-hidden"):
+                if k.text.strip() not in skills and '·' not in y.text.strip():
+                  skills.append(k.text.strip())
+          except:
+            for k in j.find_all('span', class_="visually-hidden"):
+              if k.text.strip() not in skills and '·' not in y.text.strip():
+                skills.append(k.text.strip())
+  else:
+    skills = None
+  print("Skills: ", skills)
+  
   
 def main():
   login(browser,email="chenhaifan19991113@gmail.com",password="Meiguo1969")
   # getPeopleUrl(browser,getPageNumber(browser)[0],0)
-  getPeople(browser)
+  getPeople(browser,"https://www.linkedin.com/in/alexandra-fogel-8845b216b/")
 
 
 # browser.get("https://www.linkedin.com/search/results/people/?keywords=student%20at%20harvard%20university&origin=SWITCH_SEARCH_VERTICAL&page=1&sid=L-I")
