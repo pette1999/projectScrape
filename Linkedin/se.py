@@ -14,6 +14,7 @@ import pickle
 from os.path import exists
 from tqdm import tqdm
 import csv
+import random
 
 options = webdriver.ChromeOptions()
 ua = UserAgent()
@@ -24,7 +25,7 @@ print("User Agent: ", userAgent)
 options.add_argument('--disable-blink-features=AutomationControlled')
 options.add_experimental_option("excludeSwitches", ["enable-automation"])
 options.add_experimental_option('useAutomationExtension', False)
-# options.add_argument("--headless")
+options.add_argument("--headless")
 options.add_argument("--incognito")
 browser = webdriver.Chrome(options=options)
 browser.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
@@ -35,6 +36,14 @@ def writeToFile(filename, data):
     # write the data
     writer.writerow(data)
     
+def readCol(filename, colName):
+  id = []
+  file = csv.DictReader(open(filename, 'r'))
+  for col in file:
+    id.append(col[colName])
+
+  return id
+
 def prompt_email_password():
   u = input("Email: ")
   p = getpass.getpass(prompt="Password: ")
@@ -76,9 +85,9 @@ def login(driver, email=None, password=None, timeout=10):
     email, password = prompt_email_password()
   driver.get("https://www.linkedin.com/login")
   python_button = browser.find_element(By.XPATH, '/html/body/div/main/div[2]/div[1]/form/div[1]/input')
-  python_button.send_keys("chenhaifan19991113@gmail.com")
+  python_button.send_keys(email)
   python_button = browser.find_element(By.XPATH, '/html/body/div/main/div[2]/div[1]/form/div[2]/input')
-  python_button.send_keys("Meiguo1969")
+  python_button.send_keys(password)
   python_button.submit()
   
   try:
@@ -106,12 +115,16 @@ def getPageNumber(driver):
   print(max_page)
   return [max_page,bs_content]
   
-def getPeopleUrl(driver,count,search_term):
-  link = []
+def getPeopleUrl(driver,count,filename,url1,url2):
+  link = readCol(filename,'urls')
   for c in tqdm(range(int(count))):
-    if c%10 == 0:
-      time.sleep(5)
-    url = "https://www.linkedin.com/search/results/people/?keywords=student%20at%20harvard%20university&origin=SWITCH_SEARCH_VERTICAL&page=" + str(c) + "&sid=jdX"
+    if c%10 == 0 and c>0:
+      for _ in tqdm(range(random.randrange(20, 60, 2)),desc="waiting 10 ..."):
+        time.sleep(1)
+    if c%15 == 0 and c>0:
+      for _ in tqdm(range(random.randrange(20, 60, 2)),desc="waiting 15 ..."):
+        time.sleep(1)
+    url = url1 + str(c+1) + url2
     driver.get(url)
     driver.execute_script("window.scrollTo(0, Math.ceil(document.body.scrollHeight/2));")
     time.sleep(1)
@@ -124,7 +137,7 @@ def getPeopleUrl(driver,count,search_term):
     for i in bs_content.find_all("a", class_="app-aware-link"):
       if i.get('href') not in link and '-' in i.get('href')[27:] and i.get('target') != "_self":
         link.append(i.get('href'))
-        writeToFile('./data/link.csv',[i.get('href')])
+        writeToFile(filename,[i.get('href')])
   print(len(link))
   
 def getPeople(driver, url):
@@ -285,18 +298,64 @@ def getPeople(driver, url):
   else:
     skills = None
   print("Skills: ", skills)
+  writeInfo("./data/info.csv",name,about,experience,education,volunteering,licenses,honors,skills)
   
+def writeInfo(file,name,about,experience,education,volunteering,Licenses,Hornors,Skills):
+  about_info = about
+  experience_info = ""
+  education_info = ""
+  volunteering_info = ""
+  Licenses_info = ""
+  Hornors_info = ""
+  Skills_info = ""
+  
+  if experience != None:
+    for i in experience:
+      experience_info += i
+      experience_info += '\n'
+  else:
+    experience_info = None
+  if education != None:
+    for j in education:
+      education_info += j
+      education_info += '\n'
+  else:
+    education_info = None
+  if volunteering != None:
+    for k in volunteering:
+      volunteering_info += k
+      volunteering_info += '\n'
+  else:
+    volunteering_info = None
+  if Licenses != None:
+    for x in Licenses:
+      Licenses_info += x
+      Licenses_info += '\n'
+  else:
+    Licenses_info = None
+  if Hornors != None:
+    for y in Hornors:
+      Hornors_info += y
+      Hornors_info += '\n'
+  else:
+    Hornors_info = None
+  if Skills != None:
+    for z in Skills:
+      Skills_info += z
+      Skills_info += '\n'
+  else:
+    Skills_info = None
+  
+  writeToFile(file, [name,about_info,experience_info,education_info,volunteering_info,Licenses_info,Hornors_info,Skills_info])
   
 def main():
-  login(browser,email="chenhaifan19991113@gmail.com",password="Meiguo1969")
-  # getPeopleUrl(browser,getPageNumber(browser)[0],0)
-  getPeople(browser,"https://www.linkedin.com/in/alexandra-fogel-8845b216b/")
-
-
-# browser.get("https://www.linkedin.com/search/results/people/?keywords=student%20at%20harvard%20university&origin=SWITCH_SEARCH_VERTICAL&page=1&sid=L-I")
-# bs_content = bs(browser.page_source, "lxml")
-# f = open("page.html","w")
-# f.write(str(bs_content))
-# f.close()
-
+  login(browser,email="",password="")
+  # getPeopleUrl(browser,100,'./data/mit.csv',
+  #              'https://www.linkedin.com/search/results/people/?currentCompany=%5B%221503%22%5D&keywords=student%20at%20MIT&origin=FACETED_SEARCH&page=',
+  #              '&schoolFilter=%5B%2218494%22%5D&sid=puP')
+  url1 = ['https://www.linkedin.com/search/results/people/?currentCompany=%5B%22157313%22%5D&keywords=student%20at%20Princeton%20university&origin=FACETED_SEARCH&page=', 'https://www.linkedin.com/search/results/people/?currentCompany=%5B%22157313%22%5D&geoUrn=%5B%22103644278%22%5D&keywords=student%20at%20Princeton%20university&origin=FACETED_SEARCH&page=', 'https://www.linkedin.com/search/results/people/?currentCompany=%5B%22157313%22%5D&geoUrn=%5B%2290000070%22%5D&keywords=student%20at%20Princeton%20university&origin=FACETED_SEARCH&page=', 'https://www.linkedin.com/search/results/people/?currentCompany=%5B%22157313%22%5D&geoUrn=%5B%22106031264%22%5D&keywords=student%20at%20Princeton%20university&origin=FACETED_SEARCH&page=']
+  url2 = ['&schoolFilter=%5B%2218867%22%5D&sid=Aea',
+          '&sid=H8k', '&sid=7i~', '&sid=qGA']
+  for i in tqdm(range(len(url1)),desc="total process..."):
+    getPeopleUrl(browser,100,'./data/princeton.csv',url1[i],url2[i])
 main()
