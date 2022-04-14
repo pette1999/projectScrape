@@ -353,9 +353,8 @@ def main():
   # getPeopleUrl(browser,100,'./data/mit.csv',
   #              'https://www.linkedin.com/search/results/people/?currentCompany=%5B%221503%22%5D&keywords=student%20at%20MIT&origin=FACETED_SEARCH&page=',
   #              '&schoolFilter=%5B%2218494%22%5D&sid=puP')
-  url1 = ['https://www.linkedin.com/search/results/people/?currentCompany=%5B%22157313%22%5D&keywords=student%20at%20Princeton%20university&origin=FACETED_SEARCH&page=', 'https://www.linkedin.com/search/results/people/?currentCompany=%5B%22157313%22%5D&geoUrn=%5B%22103644278%22%5D&keywords=student%20at%20Princeton%20university&origin=FACETED_SEARCH&page=', 'https://www.linkedin.com/search/results/people/?currentCompany=%5B%22157313%22%5D&geoUrn=%5B%2290000070%22%5D&keywords=student%20at%20Princeton%20university&origin=FACETED_SEARCH&page=', 'https://www.linkedin.com/search/results/people/?currentCompany=%5B%22157313%22%5D&geoUrn=%5B%22106031264%22%5D&keywords=student%20at%20Princeton%20university&origin=FACETED_SEARCH&page=']
-  url2 = ['&schoolFilter=%5B%2218867%22%5D&sid=Aea',
-          '&sid=H8k', '&sid=7i~', '&sid=qGA']
+  url1 = ['https://www.linkedin.com/search/results/people/?currentCompany=%5B%22157313%22%5D&keywords=student%20at%20Princeton%20university&origin=FACETED_SEARCH&page=']
+  url2 = ['&schoolFilter=%5B%2218867%22%5D&sid=Aea']
   for i in tqdm(range(len(url1)),desc="total process..."):
     getPeopleUrl(browser,100,'./data/princeton.csv',url1[i],url2[i])
 main()
