@@ -365,7 +365,10 @@ def collectPeople(driver,schoolname):
       time.sleep(random.randrange(5, 10, 1))
     if i%100 == 0 and i>0:
       time.sleep(random.randrange(20, 30, 1))
-    getPeople(driver, people[i], writeFilename)
+    try:
+      getPeople(driver, people[i], writeFilename)
+    except:
+      continue
   
   driver.close()
 
