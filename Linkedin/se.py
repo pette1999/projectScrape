@@ -140,7 +140,7 @@ def getPeopleUrl(driver,count,filename,url1,url2):
         writeToFile(filename,[i.get('href')])
   print(len(link))
   
-def getPeople(driver, url):
+def getPeople(driver, url, filename):
   driver.get(url)
   root = WebDriverWait(driver, 5).until(
     EC.presence_of_element_located(
@@ -169,7 +169,7 @@ def getPeople(driver, url):
     about = bs_content.find("div", class_="display-flex ph5 pv3").div.div.div.span.text
   else:
     about = None
-  print("about: ", about)
+  # print("about: ", about)
   # get experience
   section = bs_content.find_all("section", class_="artdeco-card ember-view break-words pb3 mt2")
   # check if the person has the experience section
@@ -202,7 +202,7 @@ def getPeople(driver, url):
                 experience.append(k.text.strip())
   else:
     experience = None
-  print("experience: ", experience)
+  # print("experience: ", experience)
   # get education
   # check if person has the education section
   education = []
@@ -215,7 +215,7 @@ def getPeople(driver, url):
               education.append(k.text.strip())
   else:
     education = None
-  print("education: ", education)
+  # print("education: ", education)
   # get volunteering
   volunteering = []
   if len(driver.find_elements(By.ID, 'volunteering_experience')) > 0:
@@ -244,7 +244,7 @@ def getPeople(driver, url):
                 volunteering.append(k.text.strip())
   else:
     volunteering = None
-  print("volunteering: ", volunteering)
+  # print("volunteering: ", volunteering)
   # get licenses and certificates
   licenses = []
   if len(driver.find_elements(By.ID, 'licenses_and_certifications')) > 0:
@@ -256,7 +256,7 @@ def getPeople(driver, url):
               licenses.append(k.text.strip())
   else:
     licenses = None
-  print("Licenses: ", licenses)
+  # print("Licenses: ", licenses)
   # get Honors & awards
   honors = []
   if len(driver.find_elements(By.ID, 'honors_and_awards')) > 0:
@@ -268,7 +268,7 @@ def getPeople(driver, url):
               honors.append(k.text.strip())
   else:
     honors = None
-  print("Hornors: ", honors)
+  # print("Hornors: ", honors)
   # get skills
   skills = []
   if len(driver.find_elements(By.ID, 'skills')) > 0:
@@ -297,8 +297,8 @@ def getPeople(driver, url):
                 skills.append(k.text.strip())
   else:
     skills = None
-  print("Skills: ", skills)
-  writeInfo("./data/info.csv",name,about,experience,education,volunteering,licenses,honors,skills)
+  # print("Skills: ", skills)
+  writeInfo(filename,name,about,experience,education,volunteering,licenses,honors,skills)
   
 def writeInfo(file,name,about,experience,education,volunteering,Licenses,Hornors,Skills):
   about_info = about
@@ -346,9 +346,28 @@ def writeInfo(file,name,about,experience,education,volunteering,Licenses,Hornors
   else:
     Skills_info = None
   
-  writeToFile(file, [name,about_info,experience_info,education_info,volunteering_info,Licenses_info,Hornors_info,Skills_info])
+  names = readCol(file, 'name')
+  if name not in names:
+    writeToFile(file, [name,about_info,experience_info,education_info,volunteering_info,Licenses_info,Hornors_info,Skills_info])
+  else:
+    pass
   
-def main():
-  login(browser, email="1932807205@qq.com", password="Meiguo1969")
-  getPeople(browser, "https://www.linkedin.com/in/alex-wu-3130b69b?miniProfileUrn=urn%3Ali%3Afs_miniProfile%3AACoAABUxlT8Be-fZwTfrW7WJ29AMwNDqkUBaqWU")
-# main()
+def collectPeople(driver,schoolname):
+  login(driver, email="1932807205@qq.com", password="Meiguo1969")
+  listFilename = "./data/" + schoolname + ".csv"
+  writeFilename = "./data/people/" + schoolname + "People.csv"
+  people = readCol(listFilename, 'urls')
+  
+  for i in tqdm(range(len(people))):
+    if i%10 == 0 and i>0:
+      time.sleep(random.randrange(5, 10, 1))
+    if i%30 == 0 and i>0:
+      time.sleep(random.randrange(5, 10, 1))
+    if i%100 == 0 and i>0:
+      time.sleep(random.randrange(20, 30, 1))
+    getPeople(driver, people[i], writeFilename)
+  
+  driver.close()
+
+def run(school):
+  collectPeople(browser, school)
