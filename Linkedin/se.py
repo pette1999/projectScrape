@@ -158,7 +158,7 @@ def getPeople(driver, url):
   f = open("page2.html","w")
   f.write(str(bs_content))
   f.close()
-  
+  url = browser.current_url
   # get name
   name = root.find_element(By.CLASS_NAME, 'text-heading-xlarge').text.strip()
   print("name: ", name)
@@ -171,13 +171,13 @@ def getPeople(driver, url):
     about = None
   print("about: ", about)
   # get experience
-  section = bs_content.find_all("section", class_="artdeco-card ember-view break-words pb3 mt4")
+  section = bs_content.find_all("section", class_="artdeco-card ember-view break-words pb3 mt2")
   # check if the person has the experience section
   experience = []
   if len(driver.find_elements(By.ID, 'experience')) > 0:
     for i in range(len(section)):
       if section[i].div.get('id') == "experience":
-        for j in bs_content.find_all("section", class_="artdeco-card ember-view break-words pb3 mt4")[i].select("div:nth-of-type("+str(3)+")"):
+        for j in bs_content.find_all("section", class_="artdeco-card ember-view break-words pb3 mt2")[i].select("div:nth-of-type("+str(3)+")"):
           # each j is an experience
           # check if has the show all button
           try:       
@@ -209,7 +209,7 @@ def getPeople(driver, url):
   if len(driver.find_elements(By.ID, 'education')) > 0:
     for i in range(len(section)):
       if section[i].div.get('id') == "education":
-        for j in bs_content.find_all("section", class_="artdeco-card ember-view break-words pb3 mt4")[i].select("div:nth-of-type("+str(3)+")"):
+        for j in bs_content.find_all("section", class_="artdeco-card ember-view break-words pb3 mt2")[i].select("div:nth-of-type("+str(3)+")"):
           for k in j.find_all('span', class_="visually-hidden"):
             if k.text.strip() not in education:
               education.append(k.text.strip())
@@ -221,7 +221,7 @@ def getPeople(driver, url):
   if len(driver.find_elements(By.ID, 'volunteering_experience')) > 0:
     for i in range(len(section)):
       if section[i].div.get('id') == "volunteering_experience":
-        for j in bs_content.find_all("section", class_="artdeco-card ember-view break-words pb3 mt4")[i].select("div:nth-of-type("+str(3)+")"):
+        for j in bs_content.find_all("section", class_="artdeco-card ember-view break-words pb3 mt2")[i].select("div:nth-of-type("+str(3)+")"):
           # check if has the show all button
           try:  
             if "Show all" in j.find("span", class_="pvs-navigation__text").text.strip():
@@ -250,7 +250,7 @@ def getPeople(driver, url):
   if len(driver.find_elements(By.ID, 'licenses_and_certifications')) > 0:
     for i in range(len(section)):
       if section[i].div.get('id') == "licenses_and_certifications":
-        for j in bs_content.find_all("section", class_="artdeco-card ember-view break-words pb3 mt4")[i].select("div:nth-of-type("+str(3)+")"):
+        for j in bs_content.find_all("section", class_="artdeco-card ember-view break-words pb3 mt2")[i].select("div:nth-of-type("+str(3)+")"):
           for k in j.find_all('span', class_="visually-hidden"):
             if k.text.strip() not in licenses:
               licenses.append(k.text.strip())
@@ -262,7 +262,7 @@ def getPeople(driver, url):
   if len(driver.find_elements(By.ID, 'honors_and_awards')) > 0:
     for i in range(len(section)):
       if section[i].div.get('id') == "honors_and_awards":
-        for j in bs_content.find_all("section", class_="artdeco-card ember-view break-words pb3 mt4")[i].select("div:nth-of-type("+str(3)+")"):
+        for j in bs_content.find_all("section", class_="artdeco-card ember-view break-words pb3 mt2")[i].select("div:nth-of-type("+str(3)+")"):
           for k in j.find_all('span', class_="visually-hidden"):
             if k.text.strip() not in honors:
               honors.append(k.text.strip())
@@ -274,7 +274,7 @@ def getPeople(driver, url):
   if len(driver.find_elements(By.ID, 'skills')) > 0:
     for i in range(len(section)):
       if section[i].div.get('id') == "skills":
-        for j in bs_content.find_all("section", class_="artdeco-card ember-view break-words pb3 mt4")[i].select("div:nth-of-type("+str(3)+")"):
+        for j in bs_content.find_all("section", class_="artdeco-card ember-view break-words pb3 mt2")[i].select("div:nth-of-type("+str(3)+")"):
           # check if has the show all button
           try:  
             if "Show all" in j.find("span", class_="pvs-navigation__text").text.strip():
@@ -349,12 +349,6 @@ def writeInfo(file,name,about,experience,education,volunteering,Licenses,Hornors
   writeToFile(file, [name,about_info,experience_info,education_info,volunteering_info,Licenses_info,Hornors_info,Skills_info])
   
 def main():
-  login(browser,email="",password="")
-  # getPeopleUrl(browser,100,'./data/mit.csv',
-  #              'https://www.linkedin.com/search/results/people/?currentCompany=%5B%221503%22%5D&keywords=student%20at%20MIT&origin=FACETED_SEARCH&page=',
-  #              '&schoolFilter=%5B%2218494%22%5D&sid=puP')
-  url1 = ['https://www.linkedin.com/search/results/people/?currentCompany=%5B%22157313%22%5D&keywords=student%20at%20Princeton%20university&origin=FACETED_SEARCH&page=']
-  url2 = ['&schoolFilter=%5B%2218867%22%5D&sid=Aea']
-  for i in tqdm(range(len(url1)),desc="total process..."):
-    getPeopleUrl(browser,100,'./data/princeton.csv',url1[i],url2[i])
-main()
+  login(browser, email="1932807205@qq.com", password="Meiguo1969")
+  getPeople(browser, "https://www.linkedin.com/in/alex-wu-3130b69b?miniProfileUrn=urn%3Ali%3Afs_miniProfile%3AACoAABUxlT8Be-fZwTfrW7WJ29AMwNDqkUBaqWU")
+# main()
