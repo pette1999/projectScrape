@@ -15,6 +15,7 @@ from os.path import exists
 from tqdm import tqdm
 import csv
 import random
+import textMessage as text
 
 options = webdriver.ChromeOptions()
 ua = UserAgent()
@@ -370,6 +371,7 @@ def collectPeople(driver,schoolname):
     except:
       continue
   
+  text.sendText("Harvard scrape has finished!")
   driver.close()
 
 def run(school):
