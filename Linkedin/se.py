@@ -371,7 +371,7 @@ def collectPeople(driver,schoolname):
     except:
       continue
   
-  text.sendText("Harvard scrape has finished!")
+  text.sendText('Harvard scrape has finished!', '+16265608207')
   driver.close()
 
 def run(school):
