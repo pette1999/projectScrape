@@ -1,6 +1,6 @@
 import se
 
 def main():
-  se.run('harvard')
+  se.run('mit')
 
 main()

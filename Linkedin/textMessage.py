@@ -12,6 +12,3 @@ def sendText(message,phone):
       to=phone
   )
   print(message.sid)
-
-
-sendText('Harvard scrape has finished!', '+16265608207')

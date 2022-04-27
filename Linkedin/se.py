@@ -1,3 +1,4 @@
+from requests.structures import CaseInsensitiveDict
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.by import By
@@ -15,18 +16,20 @@ from os.path import exists
 from tqdm import tqdm
 import csv
 import random
-import textMessage as text
+# import textMessage as text
+import requests
+from decouple import config
 
 options = webdriver.ChromeOptions()
 ua = UserAgent()
-userAgent = ua.random
-print("User Agent: ", userAgent)
+# userAgent = ua.random
+# print("User Agent: ", userAgent)
 # options.add_argument(f'user-agent={userAgent}')
 # options.add_argument("--user-data-dir=chrome-data")
 options.add_argument('--disable-blink-features=AutomationControlled')
 options.add_experimental_option("excludeSwitches", ["enable-automation"])
 options.add_experimental_option('useAutomationExtension', False)
-options.add_argument("--headless")
+# options.add_argument("--headless")
 options.add_argument("--incognito")
 browser = webdriver.Chrome(options=options)
 browser.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
@@ -78,11 +81,11 @@ def savecookies(driver):
   print('cookies saved')
 
 def login(driver, email=None, password=None, timeout=10):
-  if exists('./cookies.pkl'):
-    loadcookie(driver)
+  if not email or not password:
+    if exists('./cookies.pkl'):
+      loadcookie(driver)
     driver.get("https://www.linkedin.com")
     return
-  if not email or not password:
     email, password = prompt_email_password()
   driver.get("https://www.linkedin.com/login")
   python_button = browser.find_element(By.XPATH, '/html/body/div/main/div[2]/div[1]/form/div[1]/input')
@@ -143,6 +146,12 @@ def getPeopleUrl(driver,count,filename,url1,url2):
   
 def getPeople(driver, url, filename):
   driver.get(url)
+  time.sleep(3)
+  url = browser.current_url
+  if "checkpoint" in browser.current_url:
+    # we are in the checkpoint
+    time.sleep(20)
+    savecookies(driver)
   root = WebDriverWait(driver, 5).until(
     EC.presence_of_element_located(
       (
@@ -300,6 +309,7 @@ def getPeople(driver, url, filename):
     skills = None
   # print("Skills: ", skills)
   writeInfo(filename,name,about,experience,education,volunteering,licenses,honors,skills)
+  # print(name, about, experience, education,volunteering, licenses, honors, skills)
   
 def writeInfo(file,name,about,experience,education,volunteering,Licenses,Hornors,Skills):
   about_info = about
@@ -354,7 +364,7 @@ def writeInfo(file,name,about,experience,education,volunteering,Licenses,Hornors
     pass
   
 def collectPeople(driver,schoolname):
-  login(driver, email="1932807205@qq.com", password="Meiguo1969")
+  login(driver, email="syang19@syr.edu", password="Yvonnex1998!")
   listFilename = "./data/" + schoolname + ".csv"
   writeFilename = "./data/people/" + schoolname + "People.csv"
   people = readCol(listFilename, 'urls')
@@ -369,10 +379,46 @@ def collectPeople(driver,schoolname):
     try:
       getPeople(driver, people[i], writeFilename)
     except:
+      time.sleep(20)
       continue
+    s = random.randrange(5, 20, 1)
+    print(s)
+    time.sleep(s)
   
-  text.sendText('Harvard scrape has finished!', '+16265608207')
+  text.sendText(schoolname + ' scrape has finished!', '+16265608207')
   driver.close()
 
 def run(school):
   collectPeople(browser, school)
+
+
+def getPeople_Google(driver, schoolname):
+  listFilename = "./data/" + schoolname + ".csv"
+  writeFilename = "./data/people/" + schoolname + "People.csv"
+  people = readCol(listFilename, 'urls')
+  # for i in tqdm(range(len(people))):
+  #   url = people[i].replace("%", "%25").replace(":", "%3A").replace(
+  #       "/", "%2F").replace("?", "%3F").replace("=", "%3D")
+  #   google_url = "https://search.google.com/test/mobile-friendly?url=" + url
+  #   print(google_url)
+  url = "https://search.google.com/test/mobile-friendly?url=https%3A%2F%2Fwww.linkedin.com%2Fin%2Fchristianhartch%3FminiProfileUrn%3Durn%253Ali%253Afs_miniProfile%253AACoAABofwdoBHMKc9yZL7-q0vsZFI6TiOlzqFVE"
+  driver.get(url)
+  recaptcha_response = reCaptchaV3("https://www.google.com/recaptcha/api2/bframe?hl=en&v=QENb_qRrX0-mQMyENQjD6Fuj&k=6Ley2w8UAAAAAPOj6LHO_9ROattTY3rSLldc87NQ")
+  # payload = {
+  #     'g-recaptcha-response': recaptcha_response,
+  # }
+  response = webdriver.request('POST', url, data={'g-recaptcha-response': recaptcha_response})
+  while True:
+    if driver.current_url != url:
+      break
+    time.sleep(3)
+    
+  bs_content = bs(driver.page_source, "html.parser")
+  f = open("googletest.html", "w")
+  f.write(str(bs_content))
+  f.close()
+
+
+run('princeton')
+# getPeople_Google(browser,'princeton')
+# getPeople(browser,"https://www.linkedin.com/in/zidong-huang-820318b9?miniProfileUrn=urn%3Ali%3Afs_miniProfile%3AACoAABkkP5gBnEsOPHWLCyxyHkuQdY-q0iZn7Uc","")
