@@ -278,7 +278,6 @@ def getPeople(driver, url, filename):
               honors.append(k.text.strip())
   else:
     honors = None
-  # print("Hornors: ", honors)
   # get skills
   skills = []
   if len(driver.find_elements(By.ID, 'skills')) > 0:
@@ -286,7 +285,8 @@ def getPeople(driver, url, filename):
       if section[i].div.get('id') == "skills":
         for j in bs_content.find_all("section", class_="artdeco-card ember-view break-words pb3 mt2")[i].select("div:nth-of-type("+str(3)+")"):
           # check if has the show all button
-          try:  
+          print(j.find("span", class_="pvs-navigation__text").text.strip())
+          try:
             if "Show all" in j.find("span", class_="pvs-navigation__text").text.strip():
               driver.get(url + "details/skills/")
               time.sleep(3)
@@ -298,16 +298,18 @@ def getPeople(driver, url, filename):
                     skills.append(y.text.strip())
               driver.back()
             else:
+              print("here")
               for k in j.find_all('span', class_="visually-hidden"):
                 if k.text.strip() not in skills and '·' not in y.text.strip():
                   skills.append(k.text.strip())
           except:
+            print("hello")
             for k in j.find_all('span', class_="visually-hidden"):
               if k.text.strip() not in skills and '·' not in y.text.strip():
                 skills.append(k.text.strip())
   else:
     skills = None
-  # print("Skills: ", skills)
+  print("Skills: ", skills)
   writeInfo(filename,name,about,experience,education,volunteering,licenses,honors,skills)
   # print(name, about, experience, education,volunteering, licenses, honors, skills)
   
@@ -364,7 +366,7 @@ def writeInfo(file,name,about,experience,education,volunteering,Licenses,Hornors
     pass
   
 def collectPeople(driver,schoolname):
-  login(driver, email="syang19@syr.edu", password="Yvonnex1998!")
+  login(driver, email="chenhaifan19991113@gmail.com", password="Meiguo1969")
   listFilename = "./data/" + schoolname + ".csv"
   writeFilename = "./data/people/" + schoolname + "People.csv"
   people = readCol(listFilename, 'urls')
@@ -391,34 +393,6 @@ def collectPeople(driver,schoolname):
 def run(school):
   collectPeople(browser, school)
 
-
-def getPeople_Google(driver, schoolname):
-  listFilename = "./data/" + schoolname + ".csv"
-  writeFilename = "./data/people/" + schoolname + "People.csv"
-  people = readCol(listFilename, 'urls')
-  # for i in tqdm(range(len(people))):
-  #   url = people[i].replace("%", "%25").replace(":", "%3A").replace(
-  #       "/", "%2F").replace("?", "%3F").replace("=", "%3D")
-  #   google_url = "https://search.google.com/test/mobile-friendly?url=" + url
-  #   print(google_url)
-  url = "https://search.google.com/test/mobile-friendly?url=https%3A%2F%2Fwww.linkedin.com%2Fin%2Fchristianhartch%3FminiProfileUrn%3Durn%253Ali%253Afs_miniProfile%253AACoAABofwdoBHMKc9yZL7-q0vsZFI6TiOlzqFVE"
-  driver.get(url)
-  recaptcha_response = reCaptchaV3("https://www.google.com/recaptcha/api2/bframe?hl=en&v=QENb_qRrX0-mQMyENQjD6Fuj&k=6Ley2w8UAAAAAPOj6LHO_9ROattTY3rSLldc87NQ")
-  # payload = {
-  #     'g-recaptcha-response': recaptcha_response,
-  # }
-  response = webdriver.request('POST', url, data={'g-recaptcha-response': recaptcha_response})
-  while True:
-    if driver.current_url != url:
-      break
-    time.sleep(3)
-    
-  bs_content = bs(driver.page_source, "html.parser")
-  f = open("googletest.html", "w")
-  f.write(str(bs_content))
-  f.close()
-
-
-run('princeton')
+run('mit')
 # getPeople_Google(browser,'princeton')
 # getPeople(browser,"https://www.linkedin.com/in/zidong-huang-820318b9?miniProfileUrn=urn%3Ali%3Afs_miniProfile%3AACoAABkkP5gBnEsOPHWLCyxyHkuQdY-q0iZn7Uc","")
