@@ -48,6 +48,14 @@ def readCol(filename, colName):
 
   return id
 
+def cleanUpFile():
+  fi = open('./data/people/mitPeople.csv', 'rb')
+  data = fi.read()
+  fi.close()
+  fo = open('./data/people/mitPeople.csv', 'wb')
+  fo.write(data.replace('\x00', ''))
+  fo.close()
+
 def prompt_email_password():
   u = input("Email: ")
   p = getpass.getpass(prompt="Password: ")
@@ -92,17 +100,19 @@ def login(driver, email=None, password=None, timeout=10):
   python_button.send_keys(email)
   python_button = browser.find_element(By.XPATH, '/html/body/div/main/div[2]/div[1]/form/div[2]/input')
   python_button.send_keys(password)
+  time.sleep(10)
   python_button.submit()
   
-  try:
-    if driver.url == 'https://www.linkedin.com/checkpoint/lg/login-submit':
-      remember = driver.find_element_by_id(c.REMEMBER_PROMPT)
-      if remember:
-        remember.submit()
-    element = WebDriverWait(driver, timeout).until(EC.presence_of_element_located((By.ID, c.VERIFY_LOGIN_ID)))
-  except: pass
-  
+  time.sleep(10)
   savecookies(browser)
+  
+  # try:
+  #   if driver.url == 'https://www.linkedin.com/checkpoint/lg/login-submit':
+  #     remember = driver.find_element_by_id(c.REMEMBER_PROMPT)
+  #     if remember:
+  #       remember.submit()
+  #   element = WebDriverWait(driver, timeout).until(EC.presence_of_element_located((By.ID, c.VERIFY_LOGIN_ID)))
+  # except: pass
 
 def getPageNumber(driver):
   driver.get("https://www.linkedin.com/search/results/people/?keywords=student%20at%20harvard%20university&network=%5B%22S%22%5D&origin=FACETED_SEARCH&page=25&sid=5!C")
@@ -179,7 +189,7 @@ def getPeople(driver, url, filename):
     about = bs_content.find("div", class_="display-flex ph5 pv3").div.div.div.span.text
   else:
     about = None
-  # print("about: ", about)
+  print("about: ", about)
   # get experience
   section = bs_content.find_all("section", class_="artdeco-card ember-view break-words pb3 mt2")
   # check if the person has the experience section
@@ -212,7 +222,7 @@ def getPeople(driver, url, filename):
                 experience.append(k.text.strip())
   else:
     experience = None
-  # print("experience: ", experience)
+  print("experience: ", experience)
   # get education
   # check if person has the education section
   education = []
@@ -225,7 +235,7 @@ def getPeople(driver, url, filename):
               education.append(k.text.strip())
   else:
     education = None
-  # print("education: ", education)
+  print("education: ", education)
   # get volunteering
   volunteering = []
   if len(driver.find_elements(By.ID, 'volunteering_experience')) > 0:
@@ -254,7 +264,7 @@ def getPeople(driver, url, filename):
                 volunteering.append(k.text.strip())
   else:
     volunteering = None
-  # print("volunteering: ", volunteering)
+  print("volunteering: ", volunteering)
   # get licenses and certificates
   licenses = []
   if len(driver.find_elements(By.ID, 'licenses_and_certifications')) > 0:
@@ -266,7 +276,7 @@ def getPeople(driver, url, filename):
               licenses.append(k.text.strip())
   else:
     licenses = None
-  # print("Licenses: ", licenses)
+  print("Licenses: ", licenses)
   # get Honors & awards
   honors = []
   if len(driver.find_elements(By.ID, 'honors_and_awards')) > 0:
@@ -278,6 +288,7 @@ def getPeople(driver, url, filename):
               honors.append(k.text.strip())
   else:
     honors = None
+  print("Hornors: ", honors)
   # get skills
   skills = []
   if len(driver.find_elements(By.ID, 'skills')) > 0:
@@ -285,7 +296,6 @@ def getPeople(driver, url, filename):
       if section[i].div.get('id') == "skills":
         for j in bs_content.find_all("section", class_="artdeco-card ember-view break-words pb3 mt2")[i].select("div:nth-of-type("+str(3)+")"):
           # check if has the show all button
-          print(j.find("span", class_="pvs-navigation__text").text.strip())
           try:
             if "Show all" in j.find("span", class_="pvs-navigation__text").text.strip():
               driver.get(url + "details/skills/")
@@ -298,14 +308,12 @@ def getPeople(driver, url, filename):
                     skills.append(y.text.strip())
               driver.back()
             else:
-              print("here")
               for k in j.find_all('span', class_="visually-hidden"):
-                if k.text.strip() not in skills and '·' not in y.text.strip():
+                if k.text.strip() not in skills and '·' not in k.text.strip():
                   skills.append(k.text.strip())
           except:
-            print("hello")
             for k in j.find_all('span', class_="visually-hidden"):
-              if k.text.strip() not in skills and '·' not in y.text.strip():
+              if k.text.strip() not in skills and '·' not in k.text.strip():
                 skills.append(k.text.strip())
   else:
     skills = None
@@ -360,6 +368,8 @@ def writeInfo(file,name,about,experience,education,volunteering,Licenses,Hornors
     Skills_info = None
   
   names = readCol(file, 'name')
+  print(names)
+  print("names: ", names)
   if name not in names:
     writeToFile(file, [name,about_info,experience_info,education_info,volunteering_info,Licenses_info,Hornors_info,Skills_info])
   else:
@@ -370,6 +380,8 @@ def collectPeople(driver,schoolname):
   listFilename = "./data/" + schoolname + ".csv"
   writeFilename = "./data/people/" + schoolname + "People.csv"
   people = readCol(listFilename, 'urls')
+  names = readCol('./data/people/harvardPeople.csv', 'name')
+  print(names)
   
   for i in tqdm(range(len(people))):
     if i%10 == 0 and i>0:
@@ -381,18 +393,18 @@ def collectPeople(driver,schoolname):
     try:
       getPeople(driver, people[i], writeFilename)
     except:
+      print("something is wrong")
       time.sleep(20)
       continue
-    s = random.randrange(5, 20, 1)
+    s = random.randrange(15, 40, 1)
     print(s)
     time.sleep(s)
-  
-  text.sendText(schoolname + ' scrape has finished!', '+16265608207')
   driver.close()
 
 def run(school):
   collectPeople(browser, school)
 
-run('mit')
+
+run('harvard')
 # getPeople_Google(browser,'princeton')
 # getPeople(browser,"https://www.linkedin.com/in/zidong-huang-820318b9?miniProfileUrn=urn%3Ali%3Afs_miniProfile%3AACoAABkkP5gBnEsOPHWLCyxyHkuQdY-q0iZn7Uc","")
